@@ -1,0 +1,36 @@
+spring:
+  cloud:
+    stream:
+      function:
+        definition: createShipmentStep
+      bindings:
+        createShipmentStep-in-0:
+          binder: servicebus-1
+          destination: ""
+          group: ""
+        createShipmentStep-out-0:
+          binder: servicebus-1
+          destination: ""
+      binders:
+        servicebus-1:
+          type: servicebus
+          default-candidate: true
+          environment:
+            spring:
+              cloud:
+                azure:
+                  servicebus:
+                    enabled: false
+                    cross-entity-transactions: false
+                    connection-string: "test"
+      servicebus:
+        bindings:
+          createShipmentStep-in-0:
+            consumer:
+              requeue-rejected: true
+              auto-complete: true
+              receive-mode: peek_lock
+              entity-type: topic
+          createShipmentStep-out-0:
+            producer:
+              entity-type: topic
