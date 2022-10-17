@@ -43,4 +43,61 @@ public class ShipmentFlow {
                 .channel(OUTBOUND_HTTP_GATEWAY_CHANNEL)
                 .get();
     }
+
+    @Bean
+    public IntegrationFlow createShipmentIntermediaryFlow() {
+        return IntegrationFlows.from(CREATE_SHIPMENT_INTERMEDIARY_CHANNEL)
+                .log(INFO, m -> "Entering create shipment intermediate section")
+                .route(Message.class, m -> {
+                            var httpStatus = (HttpStatus) m.getHeaders().get(STATUS_CODE);
+                            return NO_CONTENT.equals(httpStatus);
+                        }, f -> f
+                                .subFlowMapping(true, f1 -> f1
+                                        .log(INFO, m -> "No shipment record has been found.")
+                                        .channel(CREATE_SHIPMENT_HEAD_CHANNEL))
+                                .subFlowMapping(false, f2 -> f2
+                                        .log(INFO, m -> "A shipment record has been found.")
+                                        .channel(CREATE_SHIPMENT_DETAILS_CHANNEL))
+                )
+                .get();
+    }
+
+    @Bean
+    public IntegrationFlow createShipmentHeadFlow() {
+        return IntegrationFlows.from(CREATE_SHIPMENT_HEAD_CHANNEL)
+                .log(INFO, m -> "Entering create shipment head section")
+                .transform(Message.class, m -> {
+                    var originalPayload = m.getHeaders().get(ORIGINAL_PAYLOAD);
+                    return MessageBuilder.createMessage(originalPayload, m.getHeaders());
+                })
+                //.transform(Message.class, transformer::transform)
+                .enrichHeaders(h -> {
+                    h.header(REQUEST_URL, "");
+                    h.header(REQUEST_METHOD, HttpMethod.POST);
+                    h.header(SUCCEEDING_CHANNEL, REVERT_TO_ORIGINAL_PAYLOAD_CHANNEL, true);
+                })
+                .channel(OUTBOUND_HTTP_GATEWAY_CHANNEL)
+                .get();
+    }
+
+    @Bean
+    public IntegrationFlow createShipmentDetailFlow() {
+        return IntegrationFlows.from(CREATE_SHIPMENT_DETAILS_CHANNEL)
+                .log(INFO, m -> "Entering create shipment details section")
+                .transform(Message.class, m -> {
+                    var originalPayload = m.getHeaders().get(ORIGINAL_PAYLOAD);
+                    return MessageBuilder.createMessage(originalPayload, m.getHeaders());
+                })
+                .enrichHeaders(h -> {
+                    var uriVariableExpressions = new HashMap<String, Expression>();
+                    uriVariableExpressions.put("ID", PARSER.parseExpression("headers['" + ORIGINAL_PAYLOAD + "'].shipment"));
+
+                    h.header(REQUEST_URL, "");
+                    h.header(REQUEST_METHOD, HttpMethod.POST);
+                    h.header(REQUEST_PARAMS, uriVariableExpressions);
+                    h.header(SUCCEEDING_CHANNEL, REVERT_TO_ORIGINAL_PAYLOAD_CHANNEL, true);
+                })
+                .channel(OUTBOUND_HTTP_GATEWAY_CHANNEL)
+                .get();
+    }
 }
