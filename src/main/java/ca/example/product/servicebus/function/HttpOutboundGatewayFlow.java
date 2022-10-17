@@ -31,12 +31,13 @@ public class HttpOutboundGatewayFlow {
         return IntegrationFlows.from(OUTBOUND_HTTP_GATEWAY_CHANNEL)
                 .log(LoggingHandler.Level.INFO, m ->
                         String.format("Sending request to the following url %s", m.getHeaders().get(REQUEST_URL)))
-                .handle(WebFlux.outboundGateway(m -> m.getHeaders().get(REQUEST_URL), defaultWebClient)
+                .handle(WebFlux.outboundGateway(m -> m.getHeaders().get(REQUEST_URL))
                         .uriVariablesFunction(m -> (Map<String, ?>) m.getHeaders()
                                 .getOrDefault(REQUEST_PARAMS, new HashMap<>()))
                         .httpMethodFunction(m -> m.getHeaders().get(REQUEST_METHOD))
                         .expectedResponseType(new ParameterizedTypeReference<List<?>>() {}),
                         e -> e.id("httpOutboundGatewayPoint")
+                                .advice()
                 )
                 .log(LoggingHandler.Level.DEBUG, m -> String.format("Outbound gateway payload : %s", m.getPayload()))
                 .log(LoggingHandler.Level.INFO, m -> String.format("Successful received response from following url %s",

@@ -6,11 +6,11 @@ spring:
       bindings:
         createShipmentStep-in-0:
           binder: servicebus-1
-          destination: ""
-          group: ""
+          destination: "ds_shipment_topic_dev"
+          group: "ds_shipment_sub_dev"
         createShipmentStep-out-0:
           binder: servicebus-1
-          destination: ""
+          destination: "ds_transfer_out_topic_dev"
       binders:
         servicebus-1:
           type: servicebus
@@ -34,3 +34,9 @@ spring:
           createShipmentStep-out-0:
             producer:
               entity-type: topic
+---
+logging:
+  pattern:
+    dateformat: yyyy-MM-dd HH:mm:ss.SSS,America/Vancouver
+  level:
+    root: DEBUG

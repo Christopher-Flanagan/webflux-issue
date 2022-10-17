@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -28,7 +29,7 @@ public class ReturnToVendor {
 
             if(Objects.isNull(result)) {
                 log.debug("Gateway time out reached during the triggering of a RTV create shipment/shipment details, triggering timeout handler.");
-                return timeoutGateway.handleGatewayTimeout(message);
+                return MessageBuilder.withPayload(new Object()).build();
             }
 
             return result;

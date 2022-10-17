@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 public final class Constants {
 
     //Timeouts
-    public static final String GATEWAY_TIMEOUT = "30000";
+    public static final String GATEWAY_TIMEOUT = "5000";
 
     // Channel names
     public static final String OUTBOUND_HTTP_GATEWAY_CHANNEL = "outboundHttpRequestChannel";

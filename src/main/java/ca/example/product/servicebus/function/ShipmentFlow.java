@@ -35,10 +35,9 @@ public class ShipmentFlow {
                     uriVariableExpressions.put("ID", PARSER.parseExpression(PAYLOAD_SHIPMENT_EXPRESSION_STRING));
 
                     h.headerExpression(ORIGINAL_PAYLOAD, "payload");
-                    h.header(SUCCEEDING_CHANNEL, CREATE_SHIPMENT_INTERMEDIARY_CHANNEL);
-                    h.header(REQUEST_URL, "");
+                    h.header(REQUEST_URL, "http://localhost:64885/");
                     h.header(REQUEST_METHOD, HttpMethod.HEAD);
-                    h.header(REQUEST_PARAMS,uriVariableExpressions);
+                    //h.header(REQUEST_PARAMS,uriVariableExpressions);
                 })
                 .channel(OUTBOUND_HTTP_GATEWAY_CHANNEL)
                 .get();
