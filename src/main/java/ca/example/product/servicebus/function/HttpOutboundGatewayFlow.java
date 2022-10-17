@@ -1,6 +1,5 @@
-package ca.example.product.integration.flow;
+package ca.example.product.servicebus.function;
 
-import ca.example.product.util.ChannelUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,15 +41,8 @@ public class HttpOutboundGatewayFlow {
                 .log(LoggingHandler.Level.INFO, m -> String.format("Successful received response from following url %s",
                                 m.getHeaders().get(REQUEST_URL)))
                 .log(LoggingHandler.Level.INFO, m -> "Retrieving succeeding route.")
-                .route(Message.class, ChannelUtil::hasNextChannelHeader, f1 -> f1
-                        .subFlowMapping(true, f2 -> f2
-                                .transform(Message.class, this::headerRemover)
-                                .route(Message.class, ChannelUtil::getNextChannel)
-                        )
-                        .subFlowMapping(false, f3 -> f3
-                                .transform(Message.class, this::headerRemover)
-                                .logAndReply(LoggingHandler.Level.INFO, m -> "No succeeding route has been found, returning message to caller."))
-                )
+                .transform(Message.class, this::headerRemover)
+                .route(Message.class, "SOME CHANNEL name")
                 .get();
     }
 

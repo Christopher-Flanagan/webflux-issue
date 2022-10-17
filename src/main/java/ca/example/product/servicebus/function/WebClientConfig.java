@@ -1,4 +1,4 @@
-package ca.example.product.config.client;
+package ca.example.product.servicebus.function;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
